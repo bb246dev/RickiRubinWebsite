@@ -1,32 +1,13 @@
-# Ricki Rubin Real Estate Website
+# Ricki Rubin Real Estate Namecheap Placeholder
 
-Static marketing website for Ricki Rubin, Realtor with Horizon Realty International.
+A static placeholder website for Ricki Rubin Real Estate, styled with the same basic palette, typography, copy, and contact information as the fuller site in development.
 
 ## Local Preview
 
 Open `index.html` in a browser, or serve the folder with any static file server.
 
-## GitHub Pages Deployment
+## Files
 
-This repository is configured for GitHub Pages through `.github/workflows/deploy-pages.yml`.
-
-After the repository is pushed to GitHub:
-
-1. Open the repository settings on GitHub.
-2. Go to **Pages**.
-3. Set the source to **GitHub Actions**.
-4. Push to `main` to deploy the site.
-
-The workflow publishes the repository root, so `index.html`, `styles.css`, and `script.js` are served directly.
-
-## FTP Host Deployment
-
-This repository is also configured for FTP deployment through `.github/workflows/deploy-ftp.yml`.
-
-Add these repository secrets in **Settings > Secrets and variables > Actions**:
-
-- `FTP_SERVER`: FTP hostname from the web host
-- `FTP_USERNAME`: FTP account username
-- `FTP_PASSWORD`: FTP account password
-
-The FTP account should open directly into the website folder. Push to `main` or run the workflow manually to upload the site to the host.
+- `index.html` - page content and structure
+- `styles.css` - responsive visual styling based on the main site direction
+- `script.js` - mobile navigation behavior
