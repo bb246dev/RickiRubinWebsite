@@ -28,12 +28,5 @@ Add these repository secrets in **Settings > Secrets and variables > Actions**:
 - `FTP_SERVER`: FTP hostname from the web host
 - `FTP_USERNAME`: FTP account username
 - `FTP_PASSWORD`: FTP account password
-- `FTP_SERVER_DIR`: destination folder on the server, ending with `/`
 
-Example `FTP_SERVER_DIR`:
-
-```text
-/home/rickbida/rickirubin.com/mrrr941/
-```
-
-Push to `main` or run the workflow manually to upload the site to the host.
+The FTP account should open directly into the website folder. Push to `main` or run the workflow manually to upload the site to the host.
