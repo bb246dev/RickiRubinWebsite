@@ -1,0 +1,12 @@
+.DS_Store
+Thumbs.db
+
+# Local editor and dependency folders
+.vscode/
+.idea/
+node_modules/
+
+# Build and coverage outputs, if tooling is added later
+dist/
+build/
+coverage/
