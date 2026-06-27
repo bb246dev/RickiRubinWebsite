@@ -725,6 +725,13 @@ const openListingDetail = (index) => {
   const location = [listing.city, listing.state, listing.zip].filter(Boolean).join(" ");
   const photos = Array.isArray(listing.photos) && listing.photos.length ? listing.photos : [listing.image].filter(Boolean);
   const firstPhoto = photos[0] || "";
+  const previewPhotos = photos.slice(1, 7);
+  const detailStats = [
+    ["Beds", listing.beds ?? "-"],
+    ["Baths", listing.baths ?? "-"],
+    ["Sq Ft", listing.sqft || "-"],
+    ["Type", listing.type || "Residential"]
+  ];
   const remarks = listing.remarks || "Contact Ricki for complete property details and current showing availability.";
 
   if (searchToolbar) {
@@ -739,7 +746,7 @@ const openListingDetail = (index) => {
       <button class="detail-photo-button detail-gallery-main" type="button" data-gallery-open="0" aria-label="Open photo 1 of ${escapeHTML(photos.length)} for ${escapeHTML(title)}">
         ${firstPhoto ? `<img src="${escapeHTML(firstPhoto)}" alt="${escapeHTML(title)}" loading="eager" decoding="async">` : '<div class="result-photo-placeholder" role="img" aria-label="Photo unavailable">Photo unavailable</div>'}
       </button>
-      ${photos.slice(1).map((photo, photoIndex) => `
+      ${previewPhotos.map((photo, photoIndex) => `
         <button class="detail-photo-button" type="button" data-gallery-open="${escapeHTML(photoIndex + 1)}" aria-label="Open photo ${escapeHTML(photoIndex + 2)} of ${escapeHTML(photos.length)} for ${escapeHTML(title)}">
           <img src="${escapeHTML(photo)}" alt="${escapeHTML(title)} photo ${photoIndex + 2}" loading="lazy" decoding="async">
         </button>
@@ -750,30 +757,45 @@ const openListingDetail = (index) => {
     <div class="listing-detail-actions">
       <button class="back-to-results" type="button">Back</button>
       <div>
-        <a href="mailto:ricki.rubin@gmail.com?subject=Real%20Estate%20Inquiry">Save</a>
-        <a href="mailto:ricki.rubin@gmail.com?subject=Real%20Estate%20Inquiry">Share</a>
+        <a href="mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(window.location.href)}">Share</a>
         <a class="detail-request-button" href="mailto:ricki.rubin@gmail.com?subject=Real%20Estate%20Inquiry">Request More Info</a>
       </div>
     </div>
     <div class="listing-detail-layout">
       <div class="listing-detail-copy">
-        <div>
+        <section class="listing-detail-summary" aria-label="Property summary">
+          <p class="eyebrow">${escapeHTML(listing.status || "Active")} Listing</p>
           <div class="detail-price">${escapeHTML(listing.price || "Price available on request")}</div>
           <h1>${escapeHTML(title)}</h1>
-          <p>${escapeHTML(location)}</p>
-        </div>
-        <div class="result-meta detail-meta">
-          ${formatMeta(listing).map((item) => `<span>${escapeHTML(item)}</span>`).join("")}
-        </div>
-        <p>${escapeHTML(remarks)}</p>
-        <dl class="listing-detail-grid">
-          ${buildDetailGrid(listing)}
-        </dl>
+          <p class="detail-location">${escapeHTML(location)}</p>
+          <div class="listing-detail-stat-row">
+            ${detailStats.map(([label, value]) => `
+              <div>
+                <strong>${escapeHTML(value)}</strong>
+                <span>${escapeHTML(label)}</span>
+              </div>
+            `).join("")}
+          </div>
+        </section>
+        <section class="listing-detail-section">
+          <h2>Property Overview</h2>
+          <p>${escapeHTML(remarks)}</p>
+        </section>
+        <section class="listing-detail-section">
+          <h2>Listing Details</h2>
+          <dl class="listing-detail-grid">
+            ${buildDetailGrid(listing)}
+          </dl>
+        </section>
       </div>
       <aside class="detail-agent-card" aria-label="Contact Ricki about this property">
         <p class="eyebrow">Listed in Stellar MLS</p>
-        <h2>Ask Ricki about this home.</h2>
+        <h2>Ask Ricki about this home</h2>
         <p>Ricki can help you review the listing details, neighborhood fit, and next steps before scheduling a showing.</p>
+        <div class="detail-agent-meta">
+          <span>MLS ${escapeHTML(listing.mls || "Available on request")}</span>
+          <span>${escapeHTML(listing.county || "Local")} County</span>
+        </div>
         <a class="button primary" href="mailto:ricki.rubin@gmail.com?subject=Real%20Estate%20Inquiry">Request More Info</a>
         <a class="button secondary" href="tel:+19414481632">Call 941-448-1632</a>
       </aside>
