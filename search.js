@@ -446,7 +446,7 @@ const formatMeta = (listing) => [
 const buildImageMarkup = (listing, className = "") => {
   const title = listing.title || listing.address || "Property photo";
   if (listing.image) {
-    return `<img class="${className}" src="${escapeHTML(listing.image)}" alt="${escapeHTML(title)}">`;
+    return `<img class="${className}" src="${escapeHTML(listing.image)}" alt="${escapeHTML(title)}" loading="lazy" decoding="async">`;
   }
 
   return `<div class="result-photo-placeholder ${className}" role="img" aria-label="Photo unavailable">Photo unavailable</div>`;
@@ -476,7 +476,7 @@ const createListingCard = (listing, index) => {
     <article class="search-listing-card" data-listing-index="${index}" data-photo-index="0">
       <div class="search-listing-photo" data-open-listing="true">
         ${firstPhoto
-          ? `<img src="${escapeHTML(firstPhoto)}" alt="${escapeHTML(title)}">`
+          ? `<img src="${escapeHTML(firstPhoto)}" alt="${escapeHTML(title)}" loading="${index < 2 ? "eager" : "lazy"}" decoding="async">`
           : '<div class="result-photo-placeholder" role="img" aria-label="Photo unavailable">Photo unavailable</div>'}
         <span class="result-badge">${escapeHTML(listing.status || "Active")}</span>
         ${hasCarousel ? `
@@ -678,10 +678,10 @@ const openListingDetail = (index) => {
   detailPanel.innerHTML = `
     <div class="listing-detail-gallery" aria-label="Property photos">
       <div class="detail-gallery-main">
-        ${firstPhoto ? `<img src="${escapeHTML(firstPhoto)}" alt="${escapeHTML(title)}">` : '<div class="result-photo-placeholder" role="img" aria-label="Photo unavailable">Photo unavailable</div>'}
+        ${firstPhoto ? `<img src="${escapeHTML(firstPhoto)}" alt="${escapeHTML(title)}" loading="eager" decoding="async">` : '<div class="result-photo-placeholder" role="img" aria-label="Photo unavailable">Photo unavailable</div>'}
       </div>
       ${photos.slice(1, 7).map((photo, photoIndex) => `
-        <img src="${escapeHTML(photo)}" alt="${escapeHTML(title)} photo ${photoIndex + 2}">
+        <img src="${escapeHTML(photo)}" alt="${escapeHTML(title)} photo ${photoIndex + 2}" loading="lazy" decoding="async">
       `).join("")}
       <span class="photo-count">${escapeHTML(listing.photoCount || photos.length)} photos</span>
     </div>

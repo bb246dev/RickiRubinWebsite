@@ -8,6 +8,9 @@ const { fetchListings } = require("./bridge-listings.cjs");
 
 const port = Number(process.env.PORT || 4173);
 const root = process.cwd();
+const listingsCache = new Map();
+const LISTINGS_CACHE_TTL_MS = 60 * 1000;
+const LISTINGS_CACHE_MAX_ENTRIES = 80;
 
 const contentTypes = {
   ".html": "text/html; charset=utf-8",
@@ -20,13 +23,30 @@ const contentTypes = {
   ".jpeg": "image/jpeg"
 };
 
-const sendJson = (res, statusCode, data) => {
+const sendJson = (res, statusCode, data, cacheControl = "no-store") => {
   res.writeHead(statusCode, {
     "Content-Type": "application/json; charset=utf-8",
-    "Cache-Control": "no-store",
+    "Cache-Control": cacheControl,
     "Access-Control-Allow-Origin": "*"
   });
   res.end(JSON.stringify(data));
+};
+
+const getListingsCacheKey = (url) => {
+  const params = [...url.searchParams.entries()]
+    .sort(([keyA, valueA], [keyB, valueB]) => keyA.localeCompare(keyB) || valueA.localeCompare(valueB));
+  return new URLSearchParams(params).toString();
+};
+
+const rememberListings = (key, data) => {
+  listingsCache.set(key, {
+    data,
+    expiresAt: Date.now() + LISTINGS_CACHE_TTL_MS
+  });
+
+  if (listingsCache.size > LISTINGS_CACHE_MAX_ENTRIES) {
+    listingsCache.delete(listingsCache.keys().next().value);
+  }
 };
 
 const serveStatic = async (req, res) => {
@@ -45,6 +65,13 @@ createServer(async (req, res) => {
     const url = new URL(req.url, `http://${req.headers.host}`);
 
     if (url.pathname === "/api/listings") {
+      const cacheKey = getListingsCacheKey(url);
+      const cached = listingsCache.get(cacheKey);
+      if (cached && cached.expiresAt > Date.now()) {
+        sendJson(res, 200, cached.data, "public, max-age=30, stale-while-revalidate=120");
+        return;
+      }
+
       const data = await fetchListings({
         query: url.searchParams.get("q") || "",
         area: url.searchParams.get("area") || "",
@@ -73,7 +100,8 @@ createServer(async (req, res) => {
         photoLimit: url.searchParams.get("photoLimit") || "48",
         token: process.env.BRIDGE_SERVER_TOKEN || process.env.BRIDGE_ACCESS_TOKEN
       });
-      sendJson(res, 200, data);
+      rememberListings(cacheKey, data);
+      sendJson(res, 200, data, "public, max-age=30, stale-while-revalidate=120");
       return;
     }
 
