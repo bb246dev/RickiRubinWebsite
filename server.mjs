@@ -28,6 +28,7 @@ const sendJson = (res, statusCode, data, cacheControl = "no-store") => {
   res.writeHead(statusCode, {
     "Content-Type": "application/json; charset=utf-8",
     "Cache-Control": cacheControl,
+    "X-Ricki-Api": "node-server-cache-v2",
     "Access-Control-Allow-Origin": "*"
   });
   res.end(JSON.stringify(data));

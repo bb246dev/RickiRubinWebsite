@@ -1,4 +1,8 @@
 const BRIDGE_SERVICE_ROOT = "https://api.bridgedataoutput.com/api/v2/OData/stellar";
+const BRIDGE_RESPONSE_CACHE_TTL_MS = 5 * 60 * 1000;
+const BRIDGE_RESPONSE_CACHE_MAX_ENTRIES = 80;
+const bridgeResponseCache = new Map();
+const pendingBridgeRequests = new Map();
 
 const BASE_FILTERS = [
   "StandardStatus eq 'Active'",
@@ -72,6 +76,17 @@ const escapeODataString = (value) => String(value || "")
   .slice(0, 80)
   .replace(/'/g, "''")
   .toLowerCase();
+
+const rememberBridgeResponse = (key, data) => {
+  bridgeResponseCache.set(key, {
+    data,
+    expiresAt: Date.now() + BRIDGE_RESPONSE_CACHE_TTL_MS
+  });
+
+  if (bridgeResponseCache.size > BRIDGE_RESPONSE_CACHE_MAX_ENTRIES) {
+    bridgeResponseCache.delete(bridgeResponseCache.keys().next().value);
+  }
+};
 
 const buildLocalCountyFilter = () => `(${[
   "tolower(CountyOrParish) eq 'manatee'",
@@ -365,32 +380,51 @@ const fetchListings = async ({
   url.searchParams.set("$filter", filters.join(" and "));
   url.searchParams.set("$orderby", buildOrderBy(sort));
 
-  const response = await fetch(url, {
-    headers: {
-      Accept: "application/json",
-      Authorization: `Bearer ${token}`
-    }
-  });
-
-  if (!response.ok) {
-    const details = await response.text();
-    const error = new Error(`Bridge API request failed with ${response.status}.`);
-    error.statusCode = response.status;
-    error.details = details;
-    throw error;
+  const cacheKey = url.toString();
+  const cached = bridgeResponseCache.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.data;
   }
 
-  const data = await response.json();
-  const listings = Array.isArray(data.value)
-    ? data.value.map((listing) => normalizeListing(listing, safePhotoLimit))
-    : [];
+  let request = pendingBridgeRequests.get(cacheKey);
+  if (!request) {
+    request = (async () => {
+      const response = await fetch(url, {
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`
+        }
+      });
 
-  return {
-    listings,
-    count: listings.length,
-    source: "Bridge/Stellar MLS",
-    generatedAt: new Date().toISOString()
-  };
+      if (!response.ok) {
+        const details = await response.text();
+        const error = new Error(`Bridge API request failed with ${response.status}.`);
+        error.statusCode = response.status;
+        error.details = details;
+        throw error;
+      }
+
+      const data = await response.json();
+      const listings = Array.isArray(data.value)
+        ? data.value.map((listing) => normalizeListing(listing, safePhotoLimit))
+        : [];
+
+      const normalized = {
+        listings,
+        count: listings.length,
+        source: "Bridge/Stellar MLS",
+        generatedAt: new Date().toISOString()
+      };
+
+      rememberBridgeResponse(cacheKey, normalized);
+      return normalized;
+    })().finally(() => {
+      pendingBridgeRequests.delete(cacheKey);
+    });
+    pendingBridgeRequests.set(cacheKey, request);
+  }
+
+  return request;
 };
 
 module.exports = {

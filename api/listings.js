@@ -43,6 +43,7 @@ module.exports = async function listingsHandler(req, res) {
     });
 
     res.setHeader("Cache-Control", "s-maxage=60, stale-while-revalidate=300");
+    res.setHeader("X-Ricki-Api", "serverless-cache-v2");
     res.status(200).json(data);
   } catch (error) {
     console.error("Listing search failed", {
