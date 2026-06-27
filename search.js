@@ -40,6 +40,8 @@ const REGIONAL_AREA = "sarasota-lakewood-ranch";
 const REGIONAL_CENTER = [27.36, -82.45];
 const REGIONAL_ZOOM = 11;
 const PAGE_LIMIT = 36;
+const SEARCH_PHOTO_LIMIT = 6;
+const DETAIL_PHOTO_LIMIT = 48;
 const PRESET_SEARCH_LABELS = {
   all: "",
   "single family": "Single Family",
@@ -431,11 +433,19 @@ const buildSearchUrl = (offset = 0) => {
     url.searchParams.set("sort", activeSort);
   }
   url.searchParams.set("limit", String(PAGE_LIMIT));
-  url.searchParams.set("photoLimit", "48");
+  url.searchParams.set("photoLimit", String(SEARCH_PHOTO_LIMIT));
   if (offset > 0) {
     url.searchParams.set("offset", String(offset));
   }
 
+  return url.toString();
+};
+
+const buildListingDetailUrl = (listing) => {
+  const url = new URL(getSearchEndpoint(), window.location.href);
+  url.searchParams.set("q", listing.mls || listing.address || listing.title || "");
+  url.searchParams.set("limit", "1");
+  url.searchParams.set("photoLimit", String(DETAIL_PHOTO_LIMIT));
   return url.toString();
 };
 
@@ -813,7 +823,61 @@ const initListingDetailMap = (listing, title) => {
   window.setTimeout(() => detailMap.invalidateSize(), 120);
 };
 
-const openListingDetail = (index) => {
+const hydrateListingDetail = async (index) => {
+  const listing = currentListings[index];
+  if (
+    !listing ||
+    listing.fullDetailsLoaded ||
+    listing.fullDetailsLoading ||
+    !listing.photoCount ||
+    (Array.isArray(listing.photos) && listing.photos.length >= Math.min(listing.photoCount, DETAIL_PHOTO_LIMIT))
+  ) {
+    return;
+  }
+
+  listing.fullDetailsLoading = true;
+
+  try {
+    const response = await fetch(buildListingDetailUrl(listing), {
+      headers: {
+        Accept: "application/json"
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error("Listing detail request failed.");
+    }
+
+    const data = await response.json();
+    const detailListings = Array.isArray(data) ? data : data.listings || data.results || [];
+    const detail = detailListings.find((item) => item.mls === listing.mls || item.id === listing.id) || detailListings[0];
+
+    if (!detail) {
+      listing.fullDetailsLoading = false;
+      return;
+    }
+
+    currentListings[index] = {
+      ...listing,
+      ...detail,
+      fullDetailsLoaded: true,
+      fullDetailsLoading: false
+    };
+
+    const activeListingId = new URLSearchParams(window.location.search).get("listing");
+    if (!detailPanel.hidden && (activeListingId === listing.mls || activeListingId === listing.id)) {
+      openListingDetail(index, {
+        hydrate: false,
+        preserveScroll: true
+      });
+    }
+  } catch (error) {
+    listing.fullDetailsLoading = false;
+  }
+};
+
+const openListingDetail = (index, options = {}) => {
+  const { hydrate = true, preserveScroll = false } = options;
   const listing = currentListings[index];
   if (!listing || !detailPanel) {
     return;
@@ -935,11 +999,17 @@ const openListingDetail = (index) => {
     }
   });
 
-  window.scrollTo({
-    top: 0,
-    left: 0,
-    behavior: "auto"
-  });
+  if (hydrate) {
+    hydrateListingDetail(index);
+  }
+
+  if (!preserveScroll) {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "auto"
+    });
+  }
 };
 
 const openListingFromUrl = () => {
