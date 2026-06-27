@@ -66,6 +66,16 @@ createServer(async (req, res) => {
   try {
     const url = new URL(req.url, `http://${req.headers.host}`);
 
+    if (url.pathname === "/api/health" || url.pathname === "/mls/health") {
+      sendJson(res, 200, {
+        ok: true,
+        version: "node-server-cache-v2",
+        root,
+        generatedAt: new Date().toISOString()
+      }, "no-store");
+      return;
+    }
+
     if (url.pathname === "/api/listings") {
       const cacheKey = getListingsCacheKey(url);
       const cached = listingsCache.get(cacheKey);
