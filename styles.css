@@ -1542,11 +1542,28 @@ h3 {
   background: var(--white);
 }
 
-.listing-detail-gallery img,
-.listing-detail-gallery .result-photo-placeholder {
+.detail-photo-button {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  cursor: zoom-in;
+  background: transparent;
+  border: 0;
+}
+
+.detail-photo-button img,
+.detail-photo-button .result-photo-placeholder {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 180ms ease;
+}
+
+.detail-photo-button:hover img,
+.detail-photo-button:focus-visible img {
+  transform: scale(1.025);
 }
 
 .detail-gallery-main {
@@ -1571,6 +1588,93 @@ h3 {
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  cursor: pointer;
+}
+
+.photo-viewer[hidden] {
+  display: none;
+}
+
+.photo-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: clamp(16px, 4vw, 48px);
+}
+
+.photo-viewer-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(7, 57, 85, 0.92);
+}
+
+.photo-viewer-dialog {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: min(1120px, 100%);
+  max-height: 88vh;
+  place-items: center;
+}
+
+.photo-viewer-dialog img {
+  width: 100%;
+  max-height: 88vh;
+  object-fit: contain;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.photo-viewer-close,
+.photo-viewer-nav {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  color: var(--white);
+  background: rgba(7, 57, 85, 0.84);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.photo-viewer-close {
+  top: 14px;
+  right: 14px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.photo-viewer-nav {
+  top: 50%;
+  width: 50px;
+  height: 64px;
+  border-radius: var(--radius);
+  font-size: 3rem;
+  transform: translateY(-50%);
+}
+
+.photo-viewer-nav.is-prev {
+  left: 14px;
+}
+
+.photo-viewer-nav.is-next {
+  right: 14px;
+}
+
+.photo-viewer-count {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  z-index: 2;
+  padding: 9px 13px;
+  color: var(--white);
+  background: rgba(7, 57, 85, 0.84);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  font-weight: 800;
 }
 
 .listing-detail-actions {

@@ -96,6 +96,9 @@ let lastRequestKey = "";
 let loadMoreObserver;
 let listingMap;
 let markerGroup;
+let activeGalleryPhotos = [];
+let activeGalleryTitle = "";
+let activeGalleryIndex = 0;
 
 const escapeHTML = (value) => String(value ?? "")
   .replaceAll("&", "&amp;")
@@ -656,6 +659,62 @@ const buildDetailGrid = (listing) => {
   `).join("");
 };
 
+const getPhotoViewer = () => detailPanel?.querySelector("[data-photo-viewer]");
+
+const closePhotoViewer = () => {
+  const viewer = getPhotoViewer();
+  if (!viewer) {
+    return;
+  }
+  viewer.hidden = true;
+  viewer.innerHTML = "";
+  activeGalleryPhotos = [];
+  activeGalleryTitle = "";
+  activeGalleryIndex = 0;
+};
+
+const renderPhotoViewer = () => {
+  const viewer = getPhotoViewer();
+  const photo = activeGalleryPhotos[activeGalleryIndex];
+  if (!viewer || !photo) {
+    return;
+  }
+
+  viewer.hidden = false;
+  viewer.innerHTML = `
+    <div class="photo-viewer-backdrop" data-gallery-action="close"></div>
+    <div class="photo-viewer-dialog" role="dialog" aria-modal="true" aria-label="Property photo gallery">
+      <button class="photo-viewer-close" type="button" data-gallery-action="close" aria-label="Close photo gallery">×</button>
+      <button class="photo-viewer-nav is-prev" type="button" data-gallery-action="prev" aria-label="Previous photo">‹</button>
+      <img src="${escapeHTML(photo)}" alt="${escapeHTML(activeGalleryTitle)} photo ${activeGalleryIndex + 1}" decoding="async">
+      <button class="photo-viewer-nav is-next" type="button" data-gallery-action="next" aria-label="Next photo">›</button>
+      <div class="photo-viewer-count">${escapeHTML(activeGalleryIndex + 1)} / ${escapeHTML(activeGalleryPhotos.length)}</div>
+    </div>
+  `;
+
+  viewer.querySelector(".photo-viewer-close")?.focus();
+};
+
+const openPhotoViewer = (photos, index, title) => {
+  if (!photos.length) {
+    return;
+  }
+
+  activeGalleryPhotos = photos;
+  activeGalleryTitle = title;
+  activeGalleryIndex = Math.min(Math.max(index, 0), photos.length - 1);
+  renderPhotoViewer();
+};
+
+const movePhotoViewer = (direction) => {
+  if (!activeGalleryPhotos.length) {
+    return;
+  }
+
+  activeGalleryIndex = (activeGalleryIndex + direction + activeGalleryPhotos.length) % activeGalleryPhotos.length;
+  renderPhotoViewer();
+};
+
 const openListingDetail = (index) => {
   const listing = currentListings[index];
   if (!listing || !detailPanel) {
@@ -677,14 +736,17 @@ const openListingDetail = (index) => {
   detailPanel.hidden = false;
   detailPanel.innerHTML = `
     <div class="listing-detail-gallery" aria-label="Property photos">
-      <div class="detail-gallery-main">
+      <button class="detail-photo-button detail-gallery-main" type="button" data-gallery-open="0" aria-label="Open photo 1 of ${escapeHTML(photos.length)} for ${escapeHTML(title)}">
         ${firstPhoto ? `<img src="${escapeHTML(firstPhoto)}" alt="${escapeHTML(title)}" loading="eager" decoding="async">` : '<div class="result-photo-placeholder" role="img" aria-label="Photo unavailable">Photo unavailable</div>'}
-      </div>
+      </button>
       ${photos.slice(1).map((photo, photoIndex) => `
-        <img src="${escapeHTML(photo)}" alt="${escapeHTML(title)} photo ${photoIndex + 2}" loading="lazy" decoding="async">
+        <button class="detail-photo-button" type="button" data-gallery-open="${escapeHTML(photoIndex + 1)}" aria-label="Open photo ${escapeHTML(photoIndex + 2)} of ${escapeHTML(photos.length)} for ${escapeHTML(title)}">
+          <img src="${escapeHTML(photo)}" alt="${escapeHTML(title)} photo ${photoIndex + 2}" loading="lazy" decoding="async">
+        </button>
       `).join("")}
-      <span class="photo-count">${escapeHTML(listing.photoCount || photos.length)} photos</span>
+      <button class="photo-count" type="button" data-gallery-open="0">${escapeHTML(listing.photoCount || photos.length)} photos</button>
     </div>
+    <div class="photo-viewer" data-photo-viewer hidden></div>
     <div class="listing-detail-actions">
       <button class="back-to-results" type="button">Back</button>
       <div>
@@ -729,6 +791,23 @@ const openListingDetail = (index) => {
       focusListingCard(index);
     });
   }
+
+  detailPanel.querySelectorAll("[data-gallery-open]").forEach((trigger) => {
+    trigger.addEventListener("click", () => {
+      openPhotoViewer(photos, Number(trigger.dataset.galleryOpen) || 0, title);
+    });
+  });
+
+  detailPanel.querySelector("[data-photo-viewer]")?.addEventListener("click", (event) => {
+    const action = event.target.closest("[data-gallery-action]")?.dataset.galleryAction;
+    if (action === "close") {
+      closePhotoViewer();
+    } else if (action === "prev") {
+      movePhotoViewer(-1);
+    } else if (action === "next") {
+      movePhotoViewer(1);
+    }
+  });
 
   window.scrollTo({
     top: 0,
@@ -891,6 +970,23 @@ if (resultsList) {
     }
 
     openListingDetail(Number(card.dataset.listingIndex));
+  });
+}
+
+if (detailPanel) {
+  document.addEventListener("keydown", (event) => {
+    const viewer = getPhotoViewer();
+    if (!viewer || viewer.hidden) {
+      return;
+    }
+
+    if (event.key === "Escape") {
+      closePhotoViewer();
+    } else if (event.key === "ArrowLeft") {
+      movePhotoViewer(-1);
+    } else if (event.key === "ArrowRight") {
+      movePhotoViewer(1);
+    }
   });
 }
 
