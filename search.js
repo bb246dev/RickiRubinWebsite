@@ -40,7 +40,7 @@ const REGIONAL_AREA = "sarasota-lakewood-ranch";
 const REGIONAL_CENTER = [27.36, -82.45];
 const REGIONAL_ZOOM = 11;
 const PAGE_LIMIT = 36;
-const SEARCH_PHOTO_LIMIT = 6;
+const SEARCH_PHOTO_LIMIT = 7;
 const DETAIL_PHOTO_LIMIT = 48;
 const PRESET_SEARCH_LABELS = {
   all: "",
@@ -887,7 +887,7 @@ const openListingDetail = (index, options = {}) => {
   const location = [listing.city, listing.state, listing.zip].filter(Boolean).join(" ");
   const photos = Array.isArray(listing.photos) && listing.photos.length ? listing.photos : [listing.image].filter(Boolean);
   const firstPhoto = photos[0] || "";
-  const previewPhotos = photos.slice(1, 5);
+  const previewPhotos = photos.slice(1, 7);
   const detailStats = [
     ["Beds", listing.beds ?? "-"],
     ["Baths", listing.baths ?? "-"],
