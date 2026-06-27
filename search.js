@@ -428,7 +428,7 @@ const buildSearchUrl = (offset = 0) => {
     url.searchParams.set("sort", activeSort);
   }
   url.searchParams.set("limit", String(PAGE_LIMIT));
-  url.searchParams.set("photoLimit", "12");
+  url.searchParams.set("photoLimit", "48");
   if (offset > 0) {
     url.searchParams.set("offset", String(offset));
   }
