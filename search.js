@@ -680,7 +680,7 @@ const openListingDetail = (index) => {
       <div class="detail-gallery-main">
         ${firstPhoto ? `<img src="${escapeHTML(firstPhoto)}" alt="${escapeHTML(title)}" loading="eager" decoding="async">` : '<div class="result-photo-placeholder" role="img" aria-label="Photo unavailable">Photo unavailable</div>'}
       </div>
-      ${photos.slice(1, 7).map((photo, photoIndex) => `
+      ${photos.slice(1).map((photo, photoIndex) => `
         <img src="${escapeHTML(photo)}" alt="${escapeHTML(title)} photo ${photoIndex + 2}" loading="lazy" decoding="async">
       `).join("")}
       <span class="photo-count">${escapeHTML(listing.photoCount || photos.length)} photos</span>
