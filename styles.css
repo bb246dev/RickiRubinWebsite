@@ -117,9 +117,10 @@ a {
   justify-content: space-between;
   gap: 24px;
   min-height: 76px;
-  padding: 14px clamp(18px, 4vw, 56px);
-  background: rgba(251, 250, 247, 0.94);
-  border-bottom: 1px solid rgba(29, 43, 47, 0.11);
+  padding: 10px clamp(18px, 4vw, 56px);
+  color: var(--white);
+  background: #073955;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(18px);
   font-family: "FreightSans Pro", "Avenir Next", Avenir, "Segoe UI", Helvetica, Arial, sans-serif;
 }
@@ -127,19 +128,7 @@ a {
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
   min-width: max-content;
-}
-
-.brand-mark {
-  display: grid;
-  width: 44px;
-  height: 44px;
-  place-items: center;
-  color: var(--white);
-  background: var(--teal);
-  border-radius: 50%;
-  font-weight: 700;
 }
 
 .brand strong,
@@ -149,13 +138,14 @@ a {
 
 .brand strong {
   font-family: "FreightDisp Pro", Georgia, "Times New Roman", serif;
-  font-size: 1.5rem;
+  color: var(--white);
+  font-size: 1.62rem;
   font-weight: 400;
   line-height: 1;
 }
 
 .brand small {
-  color: var(--ink-soft);
+  color: rgba(255, 255, 255, 0.82);
   font-size: 0.78rem;
 }
 
@@ -171,24 +161,56 @@ a {
 }
 
 .site-nav a {
+  color: rgba(255, 255, 255, 0.88);
   padding-block: 8px;
 }
 
 .menu-toggle {
-  display: none;
+  position: absolute;
+  top: 50%;
+  right: clamp(18px, 4vw, 56px);
+  z-index: 2;
+  display: block;
   width: 42px;
   height: 42px;
   padding: 9px;
   background: transparent;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: var(--radius);
+  transform: translateY(-50%);
 }
 
 .menu-toggle span {
   display: block;
   height: 2px;
   margin: 5px 0;
-  background: var(--ink);
+  background: var(--white);
+}
+
+.is-compact-nav .menu-toggle {
+  display: block;
+}
+
+.is-compact-nav .site-nav {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  display: none;
+  align-items: stretch;
+  padding: 12px 18px 20px;
+  background: #073955;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 18px 35px rgba(29, 43, 47, 0.12);
+}
+
+.is-compact-nav .site-nav.is-open {
+  display: grid;
+}
+
+.is-compact-nav .search-results-page .site-nav {
+  background: #073955;
+  border-bottom-color: rgba(255, 255, 255, 0.12);
 }
 
 .hero {
@@ -202,6 +224,12 @@ a {
     url("https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1800&q=82");
   background-position: center;
   background-size: cover;
+}
+
+@media (min-width: 1101px) {
+  .menu-toggle {
+    display: none !important;
+  }
 }
 
 .hero-inner {
@@ -719,14 +747,13 @@ h3 {
   border-bottom-color: rgba(255, 255, 255, 0.12);
 }
 
+.search-results-page .brand strong {
+  color: var(--white);
+}
+
 .search-results-page .brand small,
 .search-results-page .site-nav a {
   color: rgba(255, 255, 255, 0.88);
-}
-
-.search-results-page .brand-mark {
-  color: #073955;
-  background: var(--white);
 }
 
 .search-results-page .menu-toggle {
@@ -1712,7 +1739,7 @@ h3 {
   font-weight: 800;
 }
 
-@media (max-width: 980px) {
+@media (max-width: 1100px) {
   .menu-toggle {
     display: block;
   }
@@ -1821,6 +1848,7 @@ h3 {
 
 @media (max-width: 680px) {
   .site-header {
+    position: sticky;
     min-height: 68px;
     gap: 10px;
   }
@@ -1828,6 +1856,18 @@ h3 {
   .brand {
     flex: 1 1 auto;
     min-width: 0;
+    max-width: calc(100% - 58px);
+  }
+
+  .brand > span:last-child {
+    min-width: 0;
+  }
+
+  .brand strong {
+    font-size: 1.32rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .brand small {
@@ -1835,8 +1875,14 @@ h3 {
   }
 
   .menu-toggle {
+    position: absolute;
+    top: 50%;
+    right: clamp(18px, 4vw, 56px);
+    z-index: 2;
+    display: block !important;
     flex: 0 0 42px;
-    margin-left: auto;
+    background: transparent;
+    transform: translateY(-50%);
     order: 2;
   }
 

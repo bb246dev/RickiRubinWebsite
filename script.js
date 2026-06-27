@@ -23,6 +23,13 @@ let activeFilter = "all";
 
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
+const updateCompactNav = () => {
+  document.documentElement.classList.toggle("is-compact-nav", window.innerWidth <= 1100);
+};
+
+updateCompactNav();
+window.addEventListener("resize", updateCompactNav);
+
 const escapeHTML = (value) => String(value)
   .replaceAll("&", "&amp;")
   .replaceAll("<", "&lt;")

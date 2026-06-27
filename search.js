@@ -46,6 +46,14 @@ const PRESET_SEARCH_LABELS = {
   condo: "Condos",
   pool: "Pool Homes"
 };
+
+const updateCompactNav = () => {
+  document.documentElement.classList.toggle("is-compact-nav", window.innerWidth <= 1100);
+};
+
+updateCompactNav();
+window.addEventListener("resize", updateCompactNav);
+
 const PRICE_LABELS = {
   any: "Any Price",
   "under-500": "Under $500k",
