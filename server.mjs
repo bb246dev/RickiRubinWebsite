@@ -9,7 +9,8 @@ const { fetchListings } = require("./bridge-listings.cjs");
 const port = Number(process.env.PORT || 4173);
 const root = process.cwd();
 const listingsCache = new Map();
-const LISTINGS_CACHE_TTL_MS = 60 * 1000;
+const pendingListingsRequests = new Map();
+const LISTINGS_CACHE_TTL_MS = 5 * 60 * 1000;
 const LISTINGS_CACHE_MAX_ENTRIES = 80;
 
 const contentTypes = {
@@ -68,40 +69,50 @@ createServer(async (req, res) => {
       const cacheKey = getListingsCacheKey(url);
       const cached = listingsCache.get(cacheKey);
       if (cached && cached.expiresAt > Date.now()) {
-        sendJson(res, 200, cached.data, "public, max-age=30, stale-while-revalidate=120");
+        sendJson(res, 200, cached.data, "public, max-age=60, stale-while-revalidate=300");
         return;
       }
 
-      const data = await fetchListings({
-        query: url.searchParams.get("q") || "",
-        area: url.searchParams.get("area") || "",
-        propertyType: url.searchParams.get("propertyType") || "all",
-        priceRange: url.searchParams.get("priceRange") || "any",
-        feature: url.searchParams.get("feature") || "any",
-        advancedFilters: {
-          bedrooms: url.searchParams.get("bedrooms") || "any",
-          bedroomsExact: url.searchParams.get("bedroomsExact") === "true",
-          bathrooms: url.searchParams.get("bathrooms") || "any",
-          bathroomsExact: url.searchParams.get("bathroomsExact") === "true",
-          sqftMin: url.searchParams.get("sqftMin") || "",
-          sqftMax: url.searchParams.get("sqftMax") || "",
-          lotUnit: url.searchParams.get("lotUnit") || "acres",
-          lotMin: url.searchParams.get("lotMin") || "",
-          lotMax: url.searchParams.get("lotMax") || "",
-          yearMin: url.searchParams.get("yearMin") || "",
-          yearMax: url.searchParams.get("yearMax") || "",
-          garageSpaces: url.searchParams.get("garageSpaces") || "any",
-          garageExact: url.searchParams.get("garageExact") === "true",
-          daysOnMarket: url.searchParams.get("daysOnMarket") || "any"
-        },
-        sort: url.searchParams.get("sort") || "newest",
-        limit: url.searchParams.get("limit") || "12",
-        offset: url.searchParams.get("offset") || "0",
-        photoLimit: url.searchParams.get("photoLimit") || "48",
-        token: process.env.BRIDGE_SERVER_TOKEN || process.env.BRIDGE_ACCESS_TOKEN
-      });
-      rememberListings(cacheKey, data);
-      sendJson(res, 200, data, "public, max-age=30, stale-while-revalidate=120");
+      let request = pendingListingsRequests.get(cacheKey);
+      if (!request) {
+        request = fetchListings({
+          query: url.searchParams.get("q") || "",
+          area: url.searchParams.get("area") || "",
+          propertyType: url.searchParams.get("propertyType") || "all",
+          priceRange: url.searchParams.get("priceRange") || "any",
+          feature: url.searchParams.get("feature") || "any",
+          advancedFilters: {
+            bedrooms: url.searchParams.get("bedrooms") || "any",
+            bedroomsExact: url.searchParams.get("bedroomsExact") === "true",
+            bathrooms: url.searchParams.get("bathrooms") || "any",
+            bathroomsExact: url.searchParams.get("bathroomsExact") === "true",
+            sqftMin: url.searchParams.get("sqftMin") || "",
+            sqftMax: url.searchParams.get("sqftMax") || "",
+            lotUnit: url.searchParams.get("lotUnit") || "acres",
+            lotMin: url.searchParams.get("lotMin") || "",
+            lotMax: url.searchParams.get("lotMax") || "",
+            yearMin: url.searchParams.get("yearMin") || "",
+            yearMax: url.searchParams.get("yearMax") || "",
+            garageSpaces: url.searchParams.get("garageSpaces") || "any",
+            garageExact: url.searchParams.get("garageExact") === "true",
+            daysOnMarket: url.searchParams.get("daysOnMarket") || "any"
+          },
+          sort: url.searchParams.get("sort") || "newest",
+          limit: url.searchParams.get("limit") || "12",
+          offset: url.searchParams.get("offset") || "0",
+          photoLimit: url.searchParams.get("photoLimit") || "48",
+          token: process.env.BRIDGE_SERVER_TOKEN || process.env.BRIDGE_ACCESS_TOKEN
+        }).then((data) => {
+          rememberListings(cacheKey, data);
+          return data;
+        }).finally(() => {
+          pendingListingsRequests.delete(cacheKey);
+        });
+        pendingListingsRequests.set(cacheKey, request);
+      }
+
+      const data = await request;
+      sendJson(res, 200, data, "public, max-age=60, stale-while-revalidate=300");
       return;
     }
 

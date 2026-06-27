@@ -16,6 +16,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Trigger Node app restart
+        run: |
+          mkdir -p tmp
+          date -u +"%Y-%m-%dT%H:%M:%SZ" > tmp/restart.txt
+
       - name: Upload site by FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
