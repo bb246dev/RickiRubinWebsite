@@ -42,6 +42,8 @@ const REGIONAL_ZOOM = 11;
 const PAGE_LIMIT = 36;
 const SEARCH_PHOTO_LIMIT = 7;
 const DETAIL_PHOTO_LIMIT = 48;
+const CLIENT_CACHE_TTL_MS = 5 * 60 * 1000;
+const CLIENT_CACHE_PREFIX = "ricki-idx-cache:";
 const PRESET_SEARCH_LABELS = {
   all: "",
   "single family": "Single Family",
@@ -108,6 +110,43 @@ const escapeHTML = (value) => String(value ?? "")
   .replaceAll(">", "&gt;")
   .replaceAll('"', "&quot;")
   .replaceAll("'", "&#39;");
+
+const getClientCacheKey = (requestUrl) => {
+  const url = new URL(requestUrl, window.location.href);
+  const params = [...url.searchParams.entries()]
+    .sort(([keyA, valueA], [keyB, valueB]) => keyA.localeCompare(keyB) || valueA.localeCompare(valueB));
+  return `${CLIENT_CACHE_PREFIX}${url.pathname}?${new URLSearchParams(params).toString()}`;
+};
+
+const getClientCachedListings = (requestUrl) => {
+  try {
+    const cached = window.sessionStorage.getItem(getClientCacheKey(requestUrl));
+    if (!cached) {
+      return null;
+    }
+
+    const parsed = JSON.parse(cached);
+    if (!parsed?.createdAt || Date.now() - parsed.createdAt > CLIENT_CACHE_TTL_MS) {
+      window.sessionStorage.removeItem(getClientCacheKey(requestUrl));
+      return null;
+    }
+
+    return parsed.data || null;
+  } catch (error) {
+    return null;
+  }
+};
+
+const setClientCachedListings = (requestUrl, data) => {
+  try {
+    window.sessionStorage.setItem(getClientCacheKey(requestUrl), JSON.stringify({
+      createdAt: Date.now(),
+      data
+    }));
+  } catch (error) {
+    // Storage can be unavailable in private browsing; search should still work.
+  }
+};
 
 const getQueryParams = () => {
   const params = new URLSearchParams(window.location.search);
@@ -1031,6 +1070,20 @@ const setLoadMoreMessage = (message = "") => {
   }
 };
 
+const applyListingsResponse = (data, { append = false } = {}) => {
+  const nextListings = Array.isArray(data) ? data : data.listings || data.results || [];
+  const startIndex = currentListings.length;
+  currentListings = append ? [...currentListings, ...nextListings] : nextListings;
+  currentOffset = currentListings.length;
+  hasMoreListings = nextListings.length >= PAGE_LIMIT;
+  renderResults(nextListings, { append, startIndex });
+  updateMap(currentListings);
+  if (!append) {
+    openListingFromUrl();
+  }
+  setLoadMoreMessage(hasMoreListings ? "" : "All matching listings are loaded.");
+};
+
 const fetchListings = async ({ append = false } = {}) => {
   if (!resultsList || !resultsStatus) {
     return;
@@ -1063,8 +1116,16 @@ const fetchListings = async ({ append = false } = {}) => {
     setLoadMoreMessage("");
   }
 
+  const requestUrl = buildSearchUrl(currentOffset);
+  const cachedData = getClientCachedListings(requestUrl);
+  if (cachedData) {
+    applyListingsResponse(cachedData, { append });
+    isLoadingListings = false;
+    return;
+  }
+
   try {
-    const response = await fetch(buildSearchUrl(currentOffset), {
+    const response = await fetch(requestUrl, {
       headers: {
         Accept: "application/json"
       }
@@ -1075,17 +1136,8 @@ const fetchListings = async ({ append = false } = {}) => {
     }
 
     const data = await response.json();
-    const nextListings = Array.isArray(data) ? data : data.listings || data.results || [];
-    const startIndex = currentListings.length;
-    currentListings = append ? [...currentListings, ...nextListings] : nextListings;
-    currentOffset = currentListings.length;
-    hasMoreListings = nextListings.length >= PAGE_LIMIT;
-    renderResults(nextListings, { append, startIndex });
-    updateMap(currentListings);
-    if (!append) {
-      openListingFromUrl();
-    }
-    setLoadMoreMessage(hasMoreListings ? "" : "All matching listings are loaded.");
+    setClientCachedListings(requestUrl, data);
+    applyListingsResponse(data, { append });
   } catch (error) {
     resultsList.setAttribute("aria-busy", "false");
     if (append) {

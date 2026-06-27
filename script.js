@@ -13,6 +13,10 @@ const getSearchEndpoint = () => {
   return idxConfig.searchEndpoint || "/api/listings";
 };
 const REGIONAL_AREA = "sarasota-lakewood-ranch";
+const SEARCH_PAGE_LIMIT = 36;
+const SEARCH_PAGE_PHOTO_LIMIT = 7;
+const CLIENT_CACHE_TTL_MS = 5 * 60 * 1000;
+const CLIENT_CACHE_PREFIX = "ricki-idx-cache:";
 const PRESET_SEARCH_LABELS = {
   all: "",
   "single family": "Single Family",
@@ -36,6 +40,43 @@ const escapeHTML = (value) => String(value)
   .replaceAll(">", "&gt;")
   .replaceAll('"', "&quot;")
   .replaceAll("'", "&#39;");
+
+const getClientCacheKey = (requestUrl) => {
+  const url = new URL(requestUrl, window.location.href);
+  const params = [...url.searchParams.entries()]
+    .sort(([keyA, valueA], [keyB, valueB]) => keyA.localeCompare(keyB) || valueA.localeCompare(valueB));
+  return `${CLIENT_CACHE_PREFIX}${url.pathname}?${new URLSearchParams(params).toString()}`;
+};
+
+const getClientCachedListings = (requestUrl) => {
+  try {
+    const cached = window.sessionStorage.getItem(getClientCacheKey(requestUrl));
+    if (!cached) {
+      return null;
+    }
+
+    const parsed = JSON.parse(cached);
+    if (!parsed?.createdAt || Date.now() - parsed.createdAt > CLIENT_CACHE_TTL_MS) {
+      window.sessionStorage.removeItem(getClientCacheKey(requestUrl));
+      return null;
+    }
+
+    return parsed.data || null;
+  } catch (error) {
+    return null;
+  }
+};
+
+const setClientCachedListings = (requestUrl, data) => {
+  try {
+    window.sessionStorage.setItem(getClientCacheKey(requestUrl), JSON.stringify({
+      createdAt: Date.now(),
+      data
+    }));
+  } catch (error) {
+    // Search still works if browser storage is unavailable.
+  }
+};
 
 const setResultsMessage = (message) => {
   if (!resultsGrid || !resultsStatus) {
@@ -94,6 +135,15 @@ const buildSearchUrl = () => {
   url.searchParams.set("limit", "12");
   url.searchParams.set("photoLimit", "1");
 
+  return url.toString();
+};
+
+const buildDefaultSearchPageUrl = () => {
+  const url = new URL(getSearchEndpoint(), window.location.href);
+  url.searchParams.set("area", REGIONAL_AREA);
+  url.searchParams.set("sort", "newest");
+  url.searchParams.set("limit", String(SEARCH_PAGE_LIMIT));
+  url.searchParams.set("photoLimit", String(SEARCH_PAGE_PHOTO_LIMIT));
   return url.toString();
 };
 
@@ -207,4 +257,29 @@ if (searchForm && searchInput) {
       openSearchPage();
     });
   });
+}
+
+const prefetchDefaultSearch = () => {
+  const requestUrl = buildDefaultSearchPageUrl();
+  if (getClientCachedListings(requestUrl)) {
+    return;
+  }
+
+  fetch(requestUrl, {
+    headers: {
+      Accept: "application/json"
+    }
+  })
+    .then((response) => (response.ok ? response.json() : null))
+    .then((data) => {
+      if (data) {
+        setClientCachedListings(requestUrl, data);
+      }
+    })
+    .catch(() => {});
+};
+
+if (window.location.protocol !== "file:") {
+  const schedulePrefetch = window.requestIdleCallback || ((callback) => window.setTimeout(callback, 900));
+  schedulePrefetch(prefetchDefaultSearch);
 }
