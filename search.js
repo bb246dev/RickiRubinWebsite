@@ -639,24 +639,94 @@ const renderResults = (listings, { append = false, startIndex = 0 } = {}) => {
   resultsStatus.textContent = `Showing ${currentListings.length} active listing${currentListings.length === 1 ? "" : "s"} from Stellar MLS.`;
 };
 
-const buildDetailGrid = (listing) => {
-  const details = [
-    ["MLS", listing.mls],
-    ["Status", listing.status],
-    ["Property Type", listing.type],
-    ["Year Built", listing.yearBuilt],
-    ["Subdivision", listing.subdivision],
-    ["County", listing.county],
-    ["Garage", listing.garageSpaces ? `${listing.garageSpaces} spaces` : ""],
-    ["Lot Size", listing.lotSize ? `${listing.lotSize} sq ft` : ""]
-  ].filter(([, value]) => value !== undefined && value !== null && value !== "");
+const formatDisplayDate = (value) => {
+  if (!value) {
+    return "";
+  }
 
-  return details.map(([label, value]) => `
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric"
+  }).format(date);
+};
+
+const buildDetailGrid = (details) => {
+  const filteredDetails = details.filter(([, value]) => value !== undefined && value !== null && value !== "");
+
+  return filteredDetails.map(([label, value]) => `
     <div>
       <dt>${escapeHTML(label)}</dt>
       <dd>${escapeHTML(value)}</dd>
     </div>
   `).join("");
+};
+
+const buildDetailAccordion = (title, details, open = false) => {
+  const grid = buildDetailGrid(details);
+  if (!grid) {
+    return "";
+  }
+
+  return `
+    <details class="listing-detail-accordion"${open ? " open" : ""}>
+      <summary>
+        <span>${escapeHTML(title)}</span>
+        <span aria-hidden="true"></span>
+      </summary>
+      <dl class="listing-detail-grid">
+        ${grid}
+      </dl>
+    </details>
+  `;
+};
+
+const buildListingAccordions = (listing, location) => {
+  const dateListed = formatDisplayDate(listing.onMarketDate || listing.listingContractDate);
+  const propertyDetails = [
+    ["Status", listing.status],
+    ["MLS", listing.mls],
+    ["Date Listed", dateListed],
+    ["Property Type", listing.type],
+    ["Year Built", listing.yearBuilt],
+    ["Living Area", listing.sqft ? `${listing.sqft} sq ft` : ""],
+    ["Lot Size", listing.lotSize ? `${listing.lotSize} sq ft` : ""],
+    ["Garage Spaces", listing.garageSpaces]
+  ];
+  const interiorFeatures = [
+    ["Bedrooms", listing.beds],
+    ["Bathrooms", listing.baths],
+    ["Full Bathrooms", listing.bathroomsFull],
+    ["Half Bathrooms", listing.bathroomsHalf],
+    ["Living Area", listing.sqft ? `${listing.sqft} sq ft` : ""],
+    ["Year Built", listing.yearBuilt]
+  ];
+  const utilitiesAndAppliances = [
+    ["Garage Spaces", listing.garageSpaces],
+    ["Property Type", listing.type],
+    ["Stellar MLS", listing.mls ? "Full utility and appliance details available by request" : ""]
+  ];
+  const community = [
+    ["Address", listing.address],
+    ["Location", location],
+    ["Subdivision", listing.subdivision],
+    ["City", listing.city],
+    ["County", listing.county],
+    ["State", listing.state],
+    ["ZIP", listing.zip]
+  ];
+
+  return [
+    buildDetailAccordion("Property Details", propertyDetails, true),
+    buildDetailAccordion("Interior Features", interiorFeatures),
+    buildDetailAccordion("Utilities & Appliances", utilitiesAndAppliances),
+    buildDetailAccordion("Community", community)
+  ].join("");
 };
 
 const getPhotoViewer = () => detailPanel?.querySelector("[data-photo-viewer]");
@@ -715,6 +785,34 @@ const movePhotoViewer = (direction) => {
   renderPhotoViewer();
 };
 
+const initListingDetailMap = (listing, title) => {
+  const mapNode = detailPanel?.querySelector("[data-detail-map]");
+  if (
+    !mapNode ||
+    !window.L ||
+    typeof listing.latitude !== "number" ||
+    typeof listing.longitude !== "number"
+  ) {
+    return;
+  }
+
+  const detailMap = L.map(mapNode, {
+    attributionControl: true,
+    scrollWheelZoom: false,
+    zoomControl: true
+  }).setView([listing.latitude, listing.longitude], 15);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  }).addTo(detailMap);
+
+  L.marker([listing.latitude, listing.longitude])
+    .addTo(detailMap)
+    .bindPopup(escapeHTML(title));
+
+  window.setTimeout(() => detailMap.invalidateSize(), 120);
+};
+
 const openListingDetail = (index) => {
   const listing = currentListings[index];
   if (!listing || !detailPanel) {
@@ -725,7 +823,7 @@ const openListingDetail = (index) => {
   const location = [listing.city, listing.state, listing.zip].filter(Boolean).join(" ");
   const photos = Array.isArray(listing.photos) && listing.photos.length ? listing.photos : [listing.image].filter(Boolean);
   const firstPhoto = photos[0] || "";
-  const previewPhotos = photos.slice(1, 7);
+  const previewPhotos = photos.slice(1, 5);
   const detailStats = [
     ["Beds", listing.beds ?? "-"],
     ["Baths", listing.baths ?? "-"],
@@ -733,6 +831,8 @@ const openListingDetail = (index) => {
     ["Type", listing.type || "Residential"]
   ];
   const remarks = listing.remarks || "Contact Ricki for complete property details and current showing availability.";
+  const detailAccordions = buildListingAccordions(listing, location);
+  const hasMap = typeof listing.latitude === "number" && typeof listing.longitude === "number";
 
   if (searchToolbar) {
     searchToolbar.hidden = true;
@@ -781,11 +881,14 @@ const openListingDetail = (index) => {
           <h2>Property Overview</h2>
           <p>${escapeHTML(remarks)}</p>
         </section>
-        <section class="listing-detail-section">
-          <h2>Listing Details</h2>
-          <dl class="listing-detail-grid">
-            ${buildDetailGrid(listing)}
-          </dl>
+        ${hasMap ? `
+          <section class="listing-detail-section listing-detail-map-section" aria-label="Property location">
+            <h2>Location</h2>
+            <div class="listing-detail-map" data-detail-map></div>
+          </section>
+        ` : ""}
+        <section class="listing-detail-section listing-detail-accordions" aria-label="Property details">
+          ${detailAccordions}
         </section>
       </div>
       <aside class="detail-agent-card" aria-label="Contact Ricki about this property">
@@ -803,6 +906,7 @@ const openListingDetail = (index) => {
   `;
 
   updateListingUrl(listing);
+  initListingDetailMap(listing, title);
 
   const backButton = detailPanel.querySelector(".back-to-results");
   if (backButton) {
