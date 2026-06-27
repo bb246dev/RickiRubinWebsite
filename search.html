@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Search active Stellar MLS listings for homes in Sarasota, Bradenton, Lakewood Ranch, and nearby Gulf Coast communities with Ricki Rubin.">
+    <meta name="robots" content="index,follow,max-image-preview:large">
+    <meta name="author" content="Ricki Rubin, LLC">
+    <meta name="theme-color" content="#073955">
+    <link rel="canonical" href="./search.html">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Ricki Rubin Real Estate">
+    <meta property="og:title" content="MLS Search | Sarasota & Lakewood Ranch Homes">
+    <meta property="og:description" content="Browse active Stellar MLS listings across Sarasota, Bradenton, Lakewood Ranch, and nearby Gulf Coast communities.">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=82">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="MLS Search | Sarasota & Lakewood Ranch Homes">
+    <meta name="twitter:description" content="Search current Stellar MLS homes across Sarasota, Bradenton, and Lakewood Ranch.">
+    <meta name="twitter:image" content="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=82">
+    <title>MLS Search | Sarasota & Lakewood Ranch Homes</title>
+    <link rel="preconnect" href="https://images.unsplash.com">
+    <link rel="preconnect" href="https://s3.amazonaws.com">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="./styles.css">
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SearchResultsPage",
+        "name": "Search MLS Listings",
+        "description": "Active Stellar MLS listing search for Sarasota, Bradenton, Lakewood Ranch, and nearby Gulf Coast communities.",
+        "about": {
+          "@type": "RealEstateAgent",
+          "name": "Ricki Rubin, LLC",
+          "telephone": "+1-941-448-1632",
+          "email": "ricki.rubin@gmail.com",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "6160 SR 70 E, Suite 105",
+            "addressLocality": "Bradenton",
+            "addressRegion": "FL",
+            "postalCode": "34203",
+            "addressCountry": "US"
+          },
+          "areaServed": [
+            "Sarasota FL",
+            "Bradenton FL",
+            "Lakewood Ranch FL",
+            "Manatee County FL",
+            "Sarasota County FL"
+          ]
+        }
+      }
+    </script>
+  </head>
+  <body class="search-results-page">
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
+    <header class="site-header">
+      <a class="brand" href="./index.html" aria-label="Ricki Rubin home">
+        <span class="brand-mark" aria-hidden="true">RR</span>
+        <span>
+          <strong>Ricki Rubin</strong>
+          <small>Horizon Realty International</small>
+        </span>
+      </a>
+
+      <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="site-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <nav id="site-nav" class="site-nav" aria-label="Main navigation">
+        <a href="./search.html?area=sarasota-lakewood-ranch" aria-current="page">Search MLS</a>
+        <a href="./index.html#about">About</a>
+        <a href="./index.html#services">Services</a>
+        <a href="./index.html#areas">Areas</a>
+        <a href="./index.html#contact">Contact</a>
+      </nav>
+    </header>
+
+    <main id="main-content" class="search-page-main">
+      <section class="search-toolbar" aria-labelledby="search-page-title">
+        <form class="search-page-form" role="search" aria-label="Search active Stellar MLS listings">
+          <div class="search-main">
+            <label class="sr-only" for="search-location">Search by address, neighborhood, school, city, ZIP, or MLS ID</label>
+            <input id="search-location" name="search" type="search" list="area-suggestions" placeholder="Search by address, neighborhood, school, city or zip" autocomplete="off">
+            <datalist id="area-suggestions">
+              <option value="Sarasota"></option>
+              <option value="Bradenton"></option>
+              <option value="Lakewood Ranch"></option>
+              <option value="Ellenton"></option>
+              <option value="Palmetto"></option>
+              <option value="Siesta Key"></option>
+            </datalist>
+            <button class="search-button" type="submit" aria-label="Search MLS">
+              <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+                <circle cx="11" cy="11" r="7"></circle>
+                <path d="m16.65 16.65 4.35 4.35"></path>
+              </svg>
+              <span class="sr-only">Search MLS</span>
+            </button>
+          </div>
+        </form>
+        <div class="search-filter-selects" aria-label="Additional search filters">
+          <details class="filter-menu">
+            <summary>
+              <span>Price</span>
+              <strong data-price-label>Any Price</strong>
+            </summary>
+            <div class="filter-menu-panel" aria-label="Price range">
+              <button type="button" data-price-range="any">Any Price</button>
+              <button type="button" data-price-range="under-500">Under $500k</button>
+              <button type="button" data-price-range="500-750">$500k-$750k</button>
+              <button type="button" data-price-range="750-1000">$750k-$1M</button>
+              <button type="button" data-price-range="1m-plus">$1M+</button>
+            </div>
+          </details>
+
+          <details class="filter-menu">
+            <summary>
+              <span>Property Type</span>
+              <strong data-property-label>All</strong>
+            </summary>
+            <div class="filter-menu-panel" aria-label="Property type">
+              <button type="button" class="is-active" data-filter="all" aria-pressed="true">All</button>
+              <button type="button" data-filter="single family" aria-pressed="false">Single Family</button>
+              <button type="button" data-filter="condo" aria-pressed="false">Condos</button>
+              <button type="button" data-filter="pool" aria-pressed="false">Pool Homes</button>
+            </div>
+          </details>
+
+          <details class="filter-menu">
+            <summary>
+              <span>Filters</span>
+              <strong data-feature-label>Any</strong>
+            </summary>
+            <div class="filter-menu-panel advanced-filter-panel" aria-label="Additional filters">
+              <section class="advanced-filter-section" aria-labelledby="status-filter-heading">
+                <h3 id="status-filter-heading">Status</h3>
+                <div class="toggle-list">
+                  <label class="switch-control">
+                    <input type="checkbox" data-filter-toggle="openHouse">
+                    <span aria-hidden="true">Off</span>
+                    <strong>Show Open Houses Only</strong>
+                  </label>
+                  <label class="switch-control">
+                    <input type="checkbox" data-filter-toggle="companyListings">
+                    <span aria-hidden="true">Off</span>
+                    <strong>Show Company Listings Only</strong>
+                  </label>
+                  <label class="switch-control">
+                    <input type="checkbox" data-filter-toggle="priceChanges">
+                    <span aria-hidden="true">Off</span>
+                    <strong>Recent Price Changes Only</strong>
+                  </label>
+                </div>
+              </section>
+
+              <section class="advanced-filter-section" aria-labelledby="bedroom-filter-heading">
+                <h3 id="bedroom-filter-heading">Bedrooms</h3>
+                <div class="number-button-row" role="group" aria-label="Minimum bedrooms">
+                  <button type="button" class="is-active" data-bedrooms="any">Any</button>
+                  <button type="button" data-bedrooms="1">1+</button>
+                  <button type="button" data-bedrooms="2">2+</button>
+                  <button type="button" data-bedrooms="3">3+</button>
+                  <button type="button" data-bedrooms="4">4+</button>
+                  <button type="button" data-bedrooms="5">5+</button>
+                </div>
+                <label class="checkbox-control">
+                  <input type="checkbox" data-exact-filter="bedrooms">
+                  Exact Match
+                </label>
+              </section>
+
+              <section class="advanced-filter-section" aria-labelledby="bathroom-filter-heading">
+                <h3 id="bathroom-filter-heading">Bathrooms</h3>
+                <div class="number-button-row" role="group" aria-label="Minimum bathrooms">
+                  <button type="button" class="is-active" data-bathrooms="any">Any</button>
+                  <button type="button" data-bathrooms="1">1+</button>
+                  <button type="button" data-bathrooms="2">2+</button>
+                  <button type="button" data-bathrooms="3">3+</button>
+                  <button type="button" data-bathrooms="4">4+</button>
+                  <button type="button" data-bathrooms="5">5+</button>
+                </div>
+                <label class="checkbox-control">
+                  <input type="checkbox" data-exact-filter="bathrooms">
+                  Exact Match
+                </label>
+              </section>
+
+              <section class="advanced-filter-section" aria-labelledby="sqft-filter-heading">
+                <h3 id="sqft-filter-heading">Square Feet</h3>
+                <div class="range-inputs">
+                  <label>
+                    <span class="sr-only">Minimum square feet</span>
+                    <input type="number" min="0" step="50" inputmode="numeric" placeholder="No min" data-range-filter="sqftMin">
+                  </label>
+                  <span aria-hidden="true">-</span>
+                  <label>
+                    <span class="sr-only">Maximum square feet</span>
+                    <input type="number" min="0" step="50" inputmode="numeric" placeholder="No max" data-range-filter="sqftMax">
+                  </label>
+                </div>
+              </section>
+
+              <section class="advanced-filter-section" aria-labelledby="lot-filter-heading">
+                <h3 id="lot-filter-heading">Lot Size</h3>
+                <div class="radio-row" role="radiogroup" aria-label="Lot size unit">
+                  <label><input type="radio" name="lot-unit" value="sqft" data-lot-unit> SqFt</label>
+                  <label><input type="radio" name="lot-unit" value="acres" data-lot-unit checked> Acres</label>
+                </div>
+                <div class="range-inputs">
+                  <label>
+                    <span class="sr-only">Minimum lot size</span>
+                    <input type="number" min="0" step="0.1" inputmode="decimal" placeholder="No min" data-range-filter="lotMin">
+                  </label>
+                  <span aria-hidden="true">-</span>
+                  <label>
+                    <span class="sr-only">Maximum lot size</span>
+                    <input type="number" min="0" step="0.1" inputmode="decimal" placeholder="No max" data-range-filter="lotMax">
+                  </label>
+                </div>
+              </section>
+
+              <section class="advanced-filter-section" aria-labelledby="year-filter-heading">
+                <h3 id="year-filter-heading">Year Built</h3>
+                <div class="range-inputs">
+                  <label>
+                    <span class="sr-only">Minimum year built</span>
+                    <input type="number" min="1800" max="2100" step="1" inputmode="numeric" placeholder="No min" data-range-filter="yearMin">
+                  </label>
+                  <span aria-hidden="true">-</span>
+                  <label>
+                    <span class="sr-only">Maximum year built</span>
+                    <input type="number" min="1800" max="2100" step="1" inputmode="numeric" placeholder="No max" data-range-filter="yearMax">
+                  </label>
+                </div>
+              </section>
+
+              <section class="advanced-filter-section filter-two-column" aria-label="Garage and market filters">
+                <div>
+                  <h3>Garage Spaces</h3>
+                  <select data-select-filter="garageSpaces">
+                    <option value="any">Any</option>
+                    <option value="1">1+</option>
+                    <option value="2">2+</option>
+                    <option value="3">3+</option>
+                    <option value="4">4+</option>
+                  </select>
+                  <label class="checkbox-control">
+                    <input type="checkbox" data-exact-filter="garage">
+                    Exact Match
+                  </label>
+                </div>
+                <div>
+                  <h3>Days On Market</h3>
+                  <select data-select-filter="daysOnMarket">
+                    <option value="any">Any</option>
+                    <option value="7">7 days or less</option>
+                    <option value="14">14 days or less</option>
+                    <option value="30">30 days or less</option>
+                    <option value="90">90 days or less</option>
+                  </select>
+                  <span class="checkbox-control filter-spacer" aria-hidden="true">Exact Match</span>
+                </div>
+              </section>
+
+              <div class="advanced-filter-actions">
+                <button type="button" class="filter-reset-button" data-reset-advanced-filters>Reset All</button>
+                <button type="button" class="filter-done-button" data-close-advanced-filters>Done</button>
+              </div>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <section class="search-shell" aria-label="MLS listing search results">
+        <aside class="map-panel" aria-label="Map of active listings">
+          <div id="listing-map" class="listing-map" aria-label="Map view of active listings. Use the listing results for full property details."></div>
+          <p id="map-fallback" class="map-fallback" hidden>Map view is loading. Listings are still available in the results panel.</p>
+        </aside>
+
+        <section class="listings-panel" aria-labelledby="listing-results-title">
+          <div class="listings-panel-header">
+            <div>
+              <p class="eyebrow">Active Listings</p>
+              <h1 id="search-page-title">MLS Search Results</h1>
+              <h2 id="listing-results-title">Homes matching your search</h2>
+            </div>
+            <p id="search-results-status" class="search-results-status" role="status" aria-live="polite">Loading active listings.</p>
+          </div>
+
+          <div class="listing-view-toolbar" aria-label="Results display controls">
+            <label class="sort-control" for="listing-sort">
+              <span>Sort by</span>
+              <select id="listing-sort" name="sort">
+                <option value="newest">Newest</option>
+                <option value="price-high">Highest Price</option>
+                <option value="price-low">Lowest Price</option>
+                <option value="updated">Recently Updated</option>
+                <option value="availability">Availability Date</option>
+              </select>
+            </label>
+            <div class="view-toggle" aria-label="Listing view" role="group">
+              <button type="button" class="view-toggle-button is-active" data-view="images" aria-pressed="true">
+                <span class="view-icon view-icon-images" aria-hidden="true"></span>
+                Images
+              </button>
+              <button type="button" class="view-toggle-button" data-view="list" aria-pressed="false">
+                <span class="view-icon view-icon-list" aria-hidden="true"></span>
+                List
+              </button>
+            </div>
+          </div>
+
+          <div id="search-results-list" class="search-results-list" aria-busy="true"></div>
+          <p id="load-more-status" class="load-more-status" role="status" aria-live="polite"></p>
+          <div id="load-more-sentinel" class="load-more-sentinel" aria-hidden="true"></div>
+        </section>
+      </section>
+
+      <section id="listing-detail-view" class="listing-detail-view" aria-live="polite" hidden></section>
+    </main>
+
+    <script>
+      window.RICKI_IDX_CONFIG = {
+        searchEndpoint: "/api/listings"
+      };
+    </script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="./search.js"></script>
+  </body>
+</html>

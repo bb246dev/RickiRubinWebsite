@@ -3,11 +3,63 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Ricki Rubin helps buyers and sellers in Sarasota, Bradenton, Lakewood Ranch, Ellenton, Palmetto, and nearby Gulf Coast communities.">
-    <title>Ricki Rubin | Sarasota & Bradenton Real Estate</title>
+    <meta name="description" content="Ricki Rubin helps buyers and sellers search, sell, and settle into homes across Sarasota, Bradenton, Lakewood Ranch, and nearby Gulf Coast communities.">
+    <meta name="robots" content="index,follow,max-image-preview:large">
+    <meta name="author" content="Ricki Rubin, LLC">
+    <meta name="theme-color" content="#073955">
+    <link rel="canonical" href="./index.html">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Ricki Rubin Real Estate">
+    <meta property="og:title" content="Ricki Rubin Real Estate | Sarasota & Lakewood Ranch Homes">
+    <meta property="og:description" content="Search active Stellar MLS listings and work with Ricki Rubin for steady buyer, seller, and after-closing guidance across Sarasota and Manatee counties.">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=82">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Ricki Rubin Real Estate | Sarasota & Lakewood Ranch Homes">
+    <meta name="twitter:description" content="Local real estate guidance for Sarasota, Bradenton, Lakewood Ranch, and nearby Gulf Coast communities.">
+    <meta name="twitter:image" content="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=82">
+    <title>Ricki Rubin Real Estate | Sarasota & Lakewood Ranch Homes</title>
     <link rel="preconnect" href="https://images.unsplash.com">
     <link rel="preconnect" href="https://s3.amazonaws.com">
     <link rel="stylesheet" href="./styles.css">
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "RealEstateAgent",
+        "name": "Ricki Rubin, LLC",
+        "alternateName": "Ricki Rubin Real Estate",
+        "description": "Residential real estate guidance for buyers and sellers across Sarasota, Bradenton, Lakewood Ranch, and nearby Gulf Coast communities.",
+        "telephone": "+1-941-448-1632",
+        "email": "ricki.rubin@gmail.com",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "6160 SR 70 E, Suite 105",
+          "addressLocality": "Bradenton",
+          "addressRegion": "FL",
+          "postalCode": "34203",
+          "addressCountry": "US"
+        },
+        "areaServed": [
+          "Sarasota FL",
+          "Bradenton FL",
+          "Lakewood Ranch FL",
+          "Manatee County FL",
+          "Sarasota County FL"
+        ],
+        "parentOrganization": {
+          "@type": "RealEstateAgent",
+          "name": "Horizon Realty International"
+        },
+        "knowsAbout": [
+          "Stellar MLS listings",
+          "Buyer representation",
+          "Seller representation",
+          "Sarasota real estate",
+          "Bradenton real estate",
+          "Lakewood Ranch real estate"
+        ]
+      }
+    </script>
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -28,6 +80,7 @@
       </button>
 
       <nav id="site-nav" class="site-nav" aria-label="Main navigation">
+        <a href="#property-results">Search MLS</a>
         <a href="#about">About</a>
         <a href="#services">Services</a>
         <a href="#areas">Areas</a>
@@ -39,8 +92,8 @@
       <section class="hero" aria-labelledby="hero-title">
         <div class="hero-inner">
           <p class="eyebrow">Sarasota and Manatee Counties and Beyond</p>
-          <h1 id="hero-title">A steady guide for the home you buy, sell, and settle into.</h1>
-          <p class="hero-copy">A new real estate website for Ricki Rubin is on the way. In the meantime, connect directly for current listings, selling guidance, local resources, and thoughtful support across Florida's Gulf Coast.</p>
+          <h1 id="hero-title">A steady guide for the home you buy, sell, and settle into</h1>
+          <p class="hero-copy">Search active Stellar MLS listings across Sarasota, Bradenton, Lakewood Ranch, and nearby Gulf Coast communities. When you find a home worth discussing, Ricki can help you understand the details behind the listing.</p>
           <div class="button-row">
             <a class="button primary" href="tel:+19414481632">Call 941-448-1632</a>
             <a class="button secondary" href="mailto:ricki.rubin@gmail.com?subject=Real%20Estate%20Inquiry">Email Ricki</a>
@@ -67,13 +120,51 @@
         </div>
       </section>
 
+      <section id="property-results" class="property-results" aria-labelledby="property-results-heading">
+        <div class="results-header">
+          <div>
+            <p class="eyebrow">MLS Search</p>
+            <h2 id="property-results-heading">Find Your Dream Home</h2>
+          </div>
+          <p id="results-status" class="results-status" role="status" aria-live="polite">Enter a location to search active Stellar MLS listings.</p>
+        </div>
+        <form class="search-panel" role="search" aria-label="Search active MLS listings">
+          <div class="search-main">
+            <label class="sr-only" for="search-location">Search by address, neighborhood, school, city, ZIP, or MLS ID</label>
+            <input id="search-location" name="search" type="search" list="area-suggestions" placeholder="Search by address, neighborhood, school, city or zip" autocomplete="off">
+            <datalist id="area-suggestions">
+              <option value="Sarasota"></option>
+              <option value="Bradenton"></option>
+              <option value="Lakewood Ranch"></option>
+              <option value="Ellenton"></option>
+              <option value="Palmetto"></option>
+              <option value="Siesta Key"></option>
+            </datalist>
+            <button class="search-button" type="submit" aria-label="Search MLS">
+              <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+                <circle cx="11" cy="11" r="7"></circle>
+                <path d="m16.65 16.65 4.35 4.35"></path>
+              </svg>
+              <span class="sr-only">Search MLS</span>
+            </button>
+          </div>
+        </form>
+        <div class="results-tools" aria-label="Popular MLS searches">
+          <button type="button" class="filter-chip is-active" data-filter="all" aria-pressed="true">All</button>
+          <button type="button" class="filter-chip" data-filter="single family" aria-pressed="false">Single Family</button>
+          <button type="button" class="filter-chip" data-filter="condo" aria-pressed="false">Condos</button>
+          <button type="button" class="filter-chip" data-filter="pool" aria-pressed="false">Pool Homes</button>
+        </div>
+        <div class="results-grid" aria-label="Property search results" aria-busy="false"></div>
+      </section>
+
       <section id="about" class="split-section">
         <div class="image-panel">
-          <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80" alt="Bright Florida home with palm trees">
+          <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80" alt="Bright Florida home with palm trees" loading="lazy" decoding="async">
         </div>
         <div class="section-copy">
           <p class="eyebrow">Meet Ricki</p>
-          <h2>Personalized care, clear advice, and serious follow-through.</h2>
+          <h2>Personalized care, clear advice, and serious follow-through</h2>
           <p>Ricki Rubin helps clients make confident real estate decisions in Sarasota, Bradenton, Lakewood Ranch, Ellenton, Palmetto, and nearby communities.</p>
           <p>Her approach is warm, practical, and grounded in local knowledge. Buyers count on her for guidance, sellers count on her for persistence, and past clients return because she stays available after closing.</p>
         </div>
@@ -82,7 +173,7 @@
       <section id="services" class="section-block resource-section">
         <div class="section-heading">
           <p class="eyebrow">How Ricki Helps</p>
-          <h2>Real estate guidance for the search, the sale, and the life after moving day.</h2>
+          <h2>Real estate guidance for the search, the sale, and the life after moving day</h2>
         </div>
 
         <div class="resource-grid">
@@ -112,7 +203,7 @@
       <section id="areas" class="amenities-section">
         <div class="section-copy">
           <p class="eyebrow">Area Amenities</p>
-          <h2>Living well around Sarasota and Bradenton.</h2>
+          <h2>Living well around Sarasota and Bradenton</h2>
           <p>The full site will include neighborhood guidance, current listing tools, and local resources for established communities, coastal living, golf enclaves, and growing family hubs.</p>
         </div>
 
@@ -135,7 +226,7 @@
       <section id="contact" class="contact-section">
         <div class="contact-copy">
           <p class="eyebrow">Get In Touch</p>
-          <h2>Ready to talk before the full site launches?</h2>
+          <h2>Ready for the next step in your home search?</h2>
           <p>Reach out for current listings, seller preparation, buyer guidance, or a conversation about where your next chapter should begin.</p>
         </div>
         <div class="contact-card" aria-label="Contact Ricki Rubin">
@@ -150,7 +241,8 @@
     <footer class="site-footer">
       <div>
         <strong>Ricki Rubin Real Estate</strong>
-        <p>Full website coming soon.</p>
+        <p>Sarasota, Bradenton, Lakewood Ranch, and nearby Gulf Coast communities.</p>
+        <p class="accessibility-note">Accessibility help: <a href="mailto:ricki.rubin@gmail.com?subject=Website%20Accessibility%20Help">email Ricki for accessibility help</a> if you have difficulty using this site.</p>
       </div>
       <div>
         <a href="tel:+19414481632">941-448-1632</a>
@@ -158,6 +250,11 @@
       </div>
     </footer>
 
+    <script>
+      window.RICKI_IDX_CONFIG = {
+        searchEndpoint: "/api/listings"
+      };
+    </script>
     <script src="./script.js"></script>
   </body>
 </html>
