@@ -6,6 +6,10 @@ const filterButtons = document.querySelectorAll("[data-filter]");
 const priceButtons = document.querySelectorAll("[data-price-range]");
 const filterMenus = document.querySelectorAll(".filter-menu");
 const priceLabel = document.querySelector("[data-price-label]");
+const priceMinInput = document.querySelector("[data-price-min]");
+const priceMaxInput = document.querySelector("[data-price-max]");
+const applyPriceButton = document.querySelector("[data-apply-price]");
+const clearPriceButton = document.querySelector("[data-clear-price]");
 const propertyLabel = document.querySelector("[data-property-label]");
 const featureLabel = document.querySelector("[data-feature-label]");
 const bedroomButtons = document.querySelectorAll("[data-bedrooms]");
@@ -65,10 +69,46 @@ const PRICE_LABELS = {
   "750-1000": "$750k-$1M",
   "1m-plus": "$1M+"
 };
+
+const sanitizePriceValue = (value) => {
+  const cleaned = String(value || "").replace(/[^0-9.]/g, "");
+  if (!cleaned) {
+    return "";
+  }
+  const number = Number(cleaned);
+  return Number.isFinite(number) && number >= 0 ? String(Math.round(number)) : "";
+};
+
+const formatShortPrice = (value) => {
+  const number = Number(value);
+  if (!Number.isFinite(number) || number <= 0) {
+    return "";
+  }
+  if (number >= 1000000) {
+    return `$${(number / 1000000).toFixed(number >= 10000000 ? 0 : 2).replace(/\.00$/, "")}M`;
+  }
+  return `$${Math.round(number / 1000)}k`;
+};
+
+const getCustomPriceLabel = (min = activePriceMin, max = activePriceMax) => {
+  const cleanMin = sanitizePriceValue(min);
+  const cleanMax = sanitizePriceValue(max);
+  if (cleanMin && cleanMax) {
+    return `${formatShortPrice(cleanMin)}-${formatShortPrice(cleanMax)}`;
+  }
+  if (cleanMin) {
+    return `${formatShortPrice(cleanMin)}+`;
+  }
+  if (cleanMax) {
+    return `Up to ${formatShortPrice(cleanMax)}`;
+  }
+  return "";
+};
 const ADVANCED_FILTER_DEFAULTS = {
   openHouse: false,
   companyListings: false,
   priceChanges: false,
+  olderPersons: false,
   bedrooms: "any",
   bedroomsExact: false,
   bathrooms: "any",
@@ -91,6 +131,8 @@ let activeArea = "";
 let activeSort = "newest";
 let activeView = "images";
 let activePriceRange = "any";
+let activePriceMin = "";
+let activePriceMax = "";
 let activeAdvancedFilters = { ...ADVANCED_FILTER_DEFAULTS };
 let currentListings = [];
 let currentOffset = 0;
@@ -176,6 +218,8 @@ const getQueryParams = () => {
     area: params.get("area") || "",
     propertyType: params.get("propertyType") || "all",
     priceRange: params.get("priceRange") || "any",
+    priceMin: sanitizePriceValue(params.get("priceMin") || ""),
+    priceMax: sanitizePriceValue(params.get("priceMax") || ""),
     advanced,
     sort: params.get("sort") || "newest",
     view: params.get("view") || "images"
@@ -187,6 +231,7 @@ const getAdvancedFilterSummary = () => {
   if (activeAdvancedFilters.openHouse) parts.push("Open Houses");
   if (activeAdvancedFilters.companyListings) parts.push("Company");
   if (activeAdvancedFilters.priceChanges) parts.push("Price Changes");
+  if (activeAdvancedFilters.olderPersons) parts.push("Older Persons");
   if (activeAdvancedFilters.bedrooms !== "any") {
     parts.push(`${activeAdvancedFilters.bedrooms}${activeAdvancedFilters.bedroomsExact ? "" : "+"} Beds`);
   }
@@ -238,6 +283,8 @@ const getRequestKey = () => JSON.stringify({
   area: activeArea,
   filter: activeFilter,
   priceRange: activePriceRange,
+  priceMin: activePriceMin,
+  priceMax: activePriceMax,
   advanced: activeAdvancedFilters,
   sort: activeSort
 });
@@ -249,6 +296,8 @@ const updateUrl = (
   sort = activeSort,
   view = activeView,
   priceRange = activePriceRange,
+  priceMin = activePriceMin,
+  priceMax = activePriceMax,
   advanced = activeAdvancedFilters
 ) => {
   const url = new URL(window.location.href);
@@ -258,6 +307,8 @@ const updateUrl = (
   url.searchParams.delete("area");
   url.searchParams.delete("propertyType");
   url.searchParams.delete("priceRange");
+  url.searchParams.delete("priceMin");
+  url.searchParams.delete("priceMax");
   url.searchParams.delete("feature");
   ADVANCED_FILTER_KEYS.forEach((key) => url.searchParams.delete(key));
   url.searchParams.delete("sort");
@@ -274,6 +325,12 @@ const updateUrl = (
   }
   if (priceRange && priceRange !== "any") {
     url.searchParams.set("priceRange", priceRange);
+  }
+  if (priceMin) {
+    url.searchParams.set("priceMin", priceMin);
+  }
+  if (priceMax) {
+    url.searchParams.set("priceMax", priceMax);
   }
   ADVANCED_FILTER_KEYS.forEach((key) => {
     const value = advanced[key];
@@ -331,11 +388,44 @@ const setActiveFilter = (filter) => {
 
 const setActivePriceRange = (range) => {
   activePriceRange = PRICE_LABELS[range] ? range : "any";
+  activePriceMin = "";
+  activePriceMax = "";
   if (priceLabel) {
     priceLabel.textContent = PRICE_LABELS[activePriceRange];
   }
+  if (priceMinInput) {
+    priceMinInput.value = "";
+  }
+  if (priceMaxInput) {
+    priceMaxInput.value = "";
+  }
   priceButtons.forEach((button) => {
     const isActive = button.dataset.priceRange === activePriceRange;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
+  });
+};
+
+const setCustomPriceRange = (min = "", max = "") => {
+  activePriceRange = "any";
+  activePriceMin = sanitizePriceValue(min);
+  activePriceMax = sanitizePriceValue(max);
+  if (activePriceMin && activePriceMax && Number(activePriceMin) > Number(activePriceMax)) {
+    [activePriceMin, activePriceMax] = [activePriceMax, activePriceMin];
+  }
+  const customLabel = getCustomPriceLabel();
+
+  if (priceLabel) {
+    priceLabel.textContent = customLabel || PRICE_LABELS.any;
+  }
+  if (priceMinInput) {
+    priceMinInput.value = activePriceMin;
+  }
+  if (priceMaxInput) {
+    priceMaxInput.value = activePriceMax;
+  }
+  priceButtons.forEach((button) => {
+    const isActive = button.dataset.priceRange === "any" && !customLabel;
     button.classList.toggle("is-active", isActive);
     button.setAttribute("aria-pressed", String(isActive));
   });
@@ -456,6 +546,12 @@ const buildSearchUrl = (offset = 0) => {
   }
   if (activePriceRange !== "any") {
     url.searchParams.set("priceRange", activePriceRange);
+  }
+  if (activePriceMin) {
+    url.searchParams.set("priceMin", activePriceMin);
+  }
+  if (activePriceMax) {
+    url.searchParams.set("priceMax", activePriceMax);
   }
   ADVANCED_FILTER_KEYS.forEach((key) => {
     const value = activeAdvancedFilters[key];
@@ -1243,13 +1339,19 @@ if (searchForm && searchInput) {
   activeArea = params.area || (params.q ? "" : REGIONAL_AREA);
   activeSort = params.sort || "newest";
   activePriceRange = params.priceRange || "any";
+  activePriceMin = params.priceMin || "";
+  activePriceMax = params.priceMax || "";
   activeAdvancedFilters = params.advanced || { ...ADVANCED_FILTER_DEFAULTS };
   searchInput.value = params.q || getPresetLabel(params.propertyType);
   if (activeArea === REGIONAL_AREA && !params.q) {
     searchInput.placeholder = "Sarasota / Lakewood Ranch";
   }
   setActiveFilter(params.propertyType);
-  setActivePriceRange(activePriceRange);
+  if (activePriceMin || activePriceMax) {
+    setCustomPriceRange(activePriceMin, activePriceMax);
+  } else {
+    setActivePriceRange(activePriceRange);
+  }
   setActiveAdvancedFilters(activeAdvancedFilters);
   updateResultsHeading();
   setActiveView(params.view);
@@ -1290,6 +1392,38 @@ if (searchForm && searchInput) {
       fetchListings({ append: false });
     });
   });
+
+  if (applyPriceButton) {
+    applyPriceButton.addEventListener("click", () => {
+      setCustomPriceRange(priceMinInput?.value || "", priceMaxInput?.value || "");
+      const query = getSearchQueryValue(searchInput.value);
+      activeArea = query ? "" : REGIONAL_AREA;
+      updateUrl(query, activeFilter, activeArea);
+      closeFilterMenus();
+      fetchListings({ append: false });
+    });
+  }
+
+  [priceMinInput, priceMaxInput].forEach((input) => {
+    input?.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter") {
+        return;
+      }
+      event.preventDefault();
+      applyPriceButton?.click();
+    });
+  });
+
+  if (clearPriceButton) {
+    clearPriceButton.addEventListener("click", () => {
+      setActivePriceRange("any");
+      const query = getSearchQueryValue(searchInput.value);
+      activeArea = query ? "" : REGIONAL_AREA;
+      updateUrl(query, activeFilter, activeArea);
+      closeFilterMenus();
+      fetchListings({ append: false });
+    });
+  }
 
   bedroomButtons.forEach((button) => {
     button.addEventListener("click", () => {
@@ -1435,13 +1569,19 @@ window.addEventListener("popstate", () => {
   activeArea = params.area || (params.q ? "" : REGIONAL_AREA);
   activeSort = params.sort || "newest";
   activePriceRange = params.priceRange || "any";
+  activePriceMin = params.priceMin || "";
+  activePriceMax = params.priceMax || "";
   activeAdvancedFilters = params.advanced || { ...ADVANCED_FILTER_DEFAULTS };
   searchInput.value = params.q || getPresetLabel(params.propertyType);
   searchInput.placeholder = activeArea === REGIONAL_AREA && !params.q
     ? "Sarasota / Lakewood Ranch"
-    : "Search by address, neighborhood, school, city or zip";
+    : "Search by address, zip code, city and MLS number";
   setActiveFilter(params.propertyType);
-  setActivePriceRange(activePriceRange);
+  if (activePriceMin || activePriceMax) {
+    setCustomPriceRange(activePriceMin, activePriceMax);
+  } else {
+    setActivePriceRange(activePriceRange);
+  }
   setActiveAdvancedFilters(activeAdvancedFilters);
   updateResultsHeading();
   setActiveView(params.view);

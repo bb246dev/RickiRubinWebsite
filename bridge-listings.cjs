@@ -191,7 +191,17 @@ const buildTypeFilter = (propertyType) => {
   }
 };
 
-const buildPriceFilter = (priceRange) => {
+const buildPriceFilter = (priceRange, priceMin = "", priceMax = "") => {
+  const customFilters = buildRangeFilters({
+    field: "ListPrice",
+    min: priceMin,
+    max: priceMax
+  });
+
+  if (customFilters.length) {
+    return customFilters.length > 1 ? `(${customFilters.join(" and ")})` : customFilters[0];
+  }
+
   switch (String(priceRange || "").toLowerCase()) {
     case "under-500":
       return "ListPrice le 500000";
@@ -283,6 +293,9 @@ const buildAdvancedFilters = (advancedFilters = {}) => {
     const startDate = new Date(Date.now() - (daysOnMarket * 24 * 60 * 60 * 1000)).toISOString().slice(0, 10);
     filters.push(`OnMarketDate ge ${startDate}`);
   }
+  if (advancedFilters.olderPersons) {
+    filters.push("SeniorCommunityYN eq true");
+  }
 
   return filters;
 };
@@ -343,6 +356,8 @@ const fetchListings = async ({
   area = "",
   propertyType = "all",
   priceRange = "any",
+  priceMin = "",
+  priceMax = "",
   feature = "any",
   advancedFilters = {},
   sort = "newest",
@@ -366,7 +381,7 @@ const fetchListings = async ({
     buildSearchFilter(query),
     query ? "" : buildAreaFilter(area),
     buildTypeFilter(propertyType),
-    buildPriceFilter(priceRange),
+    buildPriceFilter(priceRange, priceMin, priceMax),
     buildFeatureFilter(feature),
     ...buildAdvancedFilters(advancedFilters)
   ].filter(Boolean);

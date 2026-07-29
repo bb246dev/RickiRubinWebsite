@@ -91,6 +91,8 @@ createServer(async (req, res) => {
           area: url.searchParams.get("area") || "",
           propertyType: url.searchParams.get("propertyType") || "all",
           priceRange: url.searchParams.get("priceRange") || "any",
+          priceMin: url.searchParams.get("priceMin") || "",
+          priceMax: url.searchParams.get("priceMax") || "",
           feature: url.searchParams.get("feature") || "any",
           advancedFilters: {
             bedrooms: url.searchParams.get("bedrooms") || "any",
@@ -106,7 +108,8 @@ createServer(async (req, res) => {
             yearMax: url.searchParams.get("yearMax") || "",
             garageSpaces: url.searchParams.get("garageSpaces") || "any",
             garageExact: url.searchParams.get("garageExact") === "true",
-            daysOnMarket: url.searchParams.get("daysOnMarket") || "any"
+            daysOnMarket: url.searchParams.get("daysOnMarket") || "any",
+            olderPersons: url.searchParams.get("olderPersons") === "true"
           },
           sort: url.searchParams.get("sort") || "newest",
           limit: url.searchParams.get("limit") || "12",

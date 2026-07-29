@@ -18,6 +18,8 @@ module.exports = async function listingsHandler(req, res) {
       area: getQueryParam(req, "area"),
       propertyType: getQueryParam(req, "propertyType"),
       priceRange: getQueryParam(req, "priceRange") || "any",
+      priceMin: getQueryParam(req, "priceMin"),
+      priceMax: getQueryParam(req, "priceMax"),
       feature: getQueryParam(req, "feature") || "any",
       advancedFilters: {
         bedrooms: getQueryParam(req, "bedrooms") || "any",
@@ -33,7 +35,8 @@ module.exports = async function listingsHandler(req, res) {
         yearMax: getQueryParam(req, "yearMax"),
         garageSpaces: getQueryParam(req, "garageSpaces") || "any",
         garageExact: getQueryParam(req, "garageExact") === "true",
-        daysOnMarket: getQueryParam(req, "daysOnMarket") || "any"
+        daysOnMarket: getQueryParam(req, "daysOnMarket") || "any",
+        olderPersons: getQueryParam(req, "olderPersons") === "true"
       },
       sort: getQueryParam(req, "sort") || "newest",
       limit: getQueryParam(req, "limit"),

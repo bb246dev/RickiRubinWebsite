@@ -150,11 +150,27 @@ a {
   letter-spacing: 0.01em;
 }
 
+.header-contact {
+  display: grid;
+  gap: 2px;
+  margin-left: auto;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  line-height: 1.2;
+  text-align: right;
+}
+
+.header-contact a {
+  color: inherit;
+  white-space: nowrap;
+}
+
 .site-nav {
   display: flex;
   align-items: center;
   gap: 20px;
-  margin-left: auto;
   font-size: 0.87rem;
   font-weight: 300;
   letter-spacing: 0.05em;
@@ -891,6 +907,10 @@ h3 {
   box-shadow: var(--shadow);
 }
 
+.price-filter-panel {
+  width: max(100%, 320px);
+}
+
 .filter-menu-panel button {
   min-height: 42px;
   padding: 9px 12px;
@@ -910,6 +930,46 @@ h3 {
 .filter-menu-panel button.is-active {
   color: var(--teal-dark);
   background: var(--mist);
+}
+
+.price-custom-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 10px 2px 4px;
+  border-top: 1px solid var(--line);
+}
+
+.price-custom-fields label {
+  display: grid;
+  gap: 5px;
+  color: var(--ink-soft);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.price-custom-fields input {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 10px;
+  color: var(--ink);
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.price-filter-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.price-filter-actions button {
+  text-align: center;
 }
 
 .advanced-filter-panel {
@@ -1989,6 +2049,12 @@ h3 {
 }
 
 @media (max-width: 1100px) {
+  .header-contact {
+    gap: 2px;
+    margin-right: 58px;
+    font-size: 0.72rem;
+  }
+
   .menu-toggle {
     display: block;
   }
@@ -2109,7 +2175,7 @@ h3 {
   .brand {
     flex: 1 1 auto;
     min-width: 0;
-    max-width: calc(100% - 58px);
+    max-width: calc(100% - 230px);
   }
 
   .brand > span:last-child {
@@ -2125,6 +2191,17 @@ h3 {
 
   .brand small {
     display: none;
+  }
+
+  .header-contact {
+    display: grid;
+    flex: 0 0 auto;
+    gap: 1px;
+    margin-left: auto;
+    margin-right: 52px;
+    font-size: 0.62rem;
+    line-height: 1.15;
+    text-align: right;
   }
 
   .menu-toggle {
