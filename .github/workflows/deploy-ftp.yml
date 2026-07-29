@@ -14,20 +14,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
-      - name: Trigger Node app restart
+      - name: Prepare deploy payload
         run: |
-          mkdir -p tmp
-          date -u +"%Y-%m-%dT%H:%M:%SZ" > tmp/restart.txt
+          mkdir -p _deploy/tmp
+          cp -R api assets _deploy/
+          cp app.js bridge-listings.cjs index.html package.json robots.txt script.js search.html search.js server.mjs styles.css _deploy/
+          date -u +"%Y-%m-%dT%H:%M:%SZ" > _deploy/tmp/restart.txt
 
       - name: Upload site by FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./_deploy/
           server-dir: ./
+          state-name: tmp/.ftp-deploy-sync-state.json
           exclude: |
             **/.git*
             **/.git*/**
