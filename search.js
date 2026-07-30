@@ -1575,7 +1575,7 @@ window.addEventListener("popstate", () => {
   searchInput.value = params.q || getPresetLabel(params.propertyType);
   searchInput.placeholder = activeArea === REGIONAL_AREA && !params.q
     ? "Sarasota / Lakewood Ranch"
-    : "Search by address, zip code, city and MLS number";
+    : "Search by address, zip code, city and MLS #";
   setActiveFilter(params.propertyType);
   if (activePriceMin || activePriceMax) {
     setCustomPriceRange(activePriceMin, activePriceMax);
